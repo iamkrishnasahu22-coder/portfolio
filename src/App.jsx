@@ -1,10 +1,51 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 export default function App() {
+  const [showHeader, setShowHeader] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+
+  // Hide/Show Header on Scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > lastScrollY) {
+        setShowHeader(false);
+      } else {
+        setShowHeader(true);
+      }
+      setLastScrollY(window.scrollY);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
+  // Smooth scroll for internal links
+  useEffect(() => {
+    const links = document.querySelectorAll("a[href^='#']");
+    links.forEach(link => {
+      link.addEventListener("click", e => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute("href"));
+        if (target) target.scrollIntoView({ behavior: "smooth" });
+      });
+    });
+  }, []);
+
+  // Handle form submit
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert(`Message sent!\n\nName: ${formData.name}\nEmail: ${formData.email}\nMessage: ${formData.message}`);
+    setFormData({ name: "", email: "", message: "" });
+  };
+
   return (
     <div className="font-sans text-gray-100 bg-gradient-to-br from-slate-900 via-gray-800 to-black min-h-screen">
       {/* ===== HEADER ===== */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-md border-b border-white/10">
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-md border-b border-white/10 transform transition-transform duration-500 ${
+          showHeader ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-white tracking-wide">MyPortfolio</h1>
           <nav className="space-x-6 text-sm font-medium hidden md:flex">
@@ -40,24 +81,30 @@ export default function App() {
       {/* ===== PROJECTS ===== */}
       <section id="projects" className="py-20 px-6 max-w-6xl mx-auto">
         <h3 className="text-3xl font-bold text-white mb-10 text-center">Featured Projects</h3>
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2">
           {[
             {
               title: "Portfolio Website",
               desc: "A stunning React + Tailwind portfolio to showcase my work.",
-              img: "https://source.unsplash.com/600x400/?website,design",
+              img: "https://raw.githubusercontent.com/krishnasahu2203/assets/main/portfolio.png",
               link: "#"
             },
             {
               title: "E-Commerce Store",
               desc: "A modern shopping platform with cart, payments, and admin panel.",
-              img: "https://source.unsplash.com/600x400/?ecommerce,shop",
+              img: "https://raw.githubusercontent.com/krishnasahu2203/assets/main/ecommerce.png",
               link: "#"
             },
             {
               title: "Fitness App",
               desc: "A sleek app to track workouts, nutrition, and progress.",
-              img: "https://source.unsplash.com/600x400/?fitness,app",
+              img: "https://raw.githubusercontent.com/krishnasahu2203/assets/main/fitness.png",
+              link: "#"
+            },
+            {
+              title: "Travel Explorer",
+              desc: "Discover destinations with interactive maps and guides.",
+              img: "https://raw.githubusercontent.com/krishnasahu2203/assets/main/travel.png",
               link: "#"
             }
           ].map((project, i) => (
@@ -78,21 +125,30 @@ export default function App() {
       {/* ===== CONTACT ===== */}
       <section id="contact" className="py-20 px-6 max-w-4xl mx-auto">
         <h3 className="text-3xl font-bold text-white mb-10 text-center">Contact Me</h3>
-        <form className="bg-gray-800/60 rounded-2xl shadow-lg p-8 space-y-6 border border-white/10">
+        <form onSubmit={handleSubmit} className="bg-gray-800/60 rounded-2xl shadow-lg p-8 space-y-6 border border-white/10">
           <input
             type="text"
             placeholder="Your Name"
+            value={formData.name}
+            onChange={e => setFormData({ ...formData, name: e.target.value })}
             className="w-full p-3 rounded-lg bg-gray-900/80 border border-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            required
           />
           <input
             type="email"
             placeholder="Your Email"
+            value={formData.email}
+            onChange={e => setFormData({ ...formData, email: e.target.value })}
             className="w-full p-3 rounded-lg bg-gray-900/80 border border-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            required
           />
           <textarea
             rows="5"
             placeholder="Your Message"
+            value={formData.message}
+            onChange={e => setFormData({ ...formData, message: e.target.value })}
             className="w-full p-3 rounded-lg bg-gray-900/80 border border-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            required
           ></textarea>
           <button
             type="submit"
